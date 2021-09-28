@@ -1,0 +1,16 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: bookings
+  labels:
+    strimzi.io/cluster: quarkus-saga-cluster
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+  namespace: strimzi
+spec:
+  partitions: 10
+  replicas: 3
+  config:
+    retention.ms: '604800000'
+    segment.bytes: '1073741824'

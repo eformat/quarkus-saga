@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations:
+    openshift.io/description: "quarkus-saga"
+    openshift.io/display-name: "quarkus-saga"
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    openshift.io/cluster-monitoring: "true"
+  name: quarkus-saga
+spec:
+  finalizers:
+  - kubernetes

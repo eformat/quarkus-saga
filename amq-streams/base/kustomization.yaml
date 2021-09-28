@@ -1,0 +1,6 @@
+namespace: quarkus-saga
+
+resources:
+- project.yaml
+- operator-group.yaml
+- subscription.yaml

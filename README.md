@@ -115,3 +115,67 @@ java -Dquarkus.profile=dev -jar ./payment-service/target/quarkus-app/quarkus-run
 ```
 
 Now when a failure happens, you should see compensating actions (CANCEL of bookings and payments) in the Kafka (bookings, payments) topics.
+
+
+## OpenShift
+
+This creates a demo in the `quarkus-saga` namespace.
+
+Deploy kafka operator as cluster-admin
+```bash
+kustomize build amq-streams/base | oc apply -f-
+```
+
+Deploy kafka CR
+```bash
+kustomize build amq-streams/dev | oc apply -f-
+```
+
+Deploy apps from quay.io
+```bash
+oc -n quarkus-saga new-app quay.io/eformat/narayana-lra-coordinator
+oc -n quarkus-saga new-app quay.io/eformat/payment-service
+oc -n quarkus-saga new-app quay.io/eformat/flight-service
+oc -n quarkus-saga new-app quay.io/eformat/hotel-service
+oc -n quarkus-saga new-app quay.io/eformat/booking-service
+oc -n quarkus-saga expose service/booking-service
+```
+
+Demo - port forward kafka locally 
+```bash
+oc -n quarkus-saga run tools --image=debezium/tooling --command -- bash -c 'sleep infinity'
+oc -n quarkus-saga rsh tools
+kafkacat -b quarkus-saga-cluster-kafka-bootstrap:9092 -L
+```
+
+Watch processed topic
+```bash
+kafkacat -b quarkus-saga-cluster-kafka-bootstrap:9092 -t bookings -o beginning -C -f '\nKey (%K bytes): %k
+Value (%S bytes): %s
+Timestamp: %T
+Partition: %p
+Offset: %o
+Headers: %h'
+
+kafkacat -b quarkus-saga-cluster-kafka-bootstrap:9092 -t payments -o beginning -C -f '\nKey (%K bytes): %k
+Value (%S bytes): %s
+Timestamp: %T
+Partition: %p
+Offset: %o
+Headers: %h'
+```
+
+Book a trip
+```bash
+curl -s -vv -H 'accept: */*' $(oc -n quarkus-saga get routes booking-service -o jsonpath='http://{.spec.host}/')/trip/book | jq .
+```
+
+Redeploy the image for `payment-service` that fails randomly:
+```bash
+oc tag --source=docker quay.io/eformat/payment-service:fail quarkus-saga/payment-service:latest --reference-policy=local --insecure=true
+```
+
+And put it back to normal:
+```bash
+oc tag --source=docker quay.io/eformat/payment-service:latest quarkus-saga/payment-service:latest --reference-policy=local --insecure=true
+```

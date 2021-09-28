@@ -1,0 +1,6 @@
+namespace: quarkus-saga
+
+resources:
+- bookings_topic.yaml
+- payments_topic.yaml
+- kafka_persistent_cr.yaml
