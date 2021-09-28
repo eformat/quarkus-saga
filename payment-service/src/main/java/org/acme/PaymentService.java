@@ -59,8 +59,8 @@ public class PaymentService {
     public Response pay(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, Purchase purchase) {
         purchase.setItem("PAYMENT# ".concat(purchase.getItem()));
         log.info(">>> Payment received for LRA {} and Purchase {}", lraId, purchase);
-        if (new SecureRandom().nextBoolean())
-            return Response.serverError().build();
+//        if (new SecureRandom().nextBoolean())
+//            return Response.serverError().build();
         payments.send(KafkaRecord.of(lraId, purchase));
         JsonObject response = new JsonObject().put("message", "Payment Made LRA #" + lraId);
         response.put("purchase", JsonObject.mapFrom(purchase));
