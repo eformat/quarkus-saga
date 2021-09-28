@@ -48,13 +48,12 @@ Headers: %h'
 
 Install data-library
 ```bash
-cd data-library && mvn package install
+cd data-library && mvn clean package install
 ```
 
 Package Apps
 ```bash
-cd saga-pattern
-mvn clean pacakge
+mvn clean package
 ```
 
 Run lra coordinator
@@ -87,3 +86,31 @@ Check LRA - should be empty if no failures
 curl -s http://localhost:50000/lra-coordinator | jq .
 ```
 
+## Introduce random failure
+
+Introduce some random failure into the payment service:
+```java
+diff --git a/payment-service/src/main/java/org/acme/PaymentService.java b/payment-service/src/main/java/org/acme/PaymentService.java
+index 94a6293..4f63c47 100644
+--- a/payment-service/src/main/java/org/acme/PaymentService.java
++++ b/payment-service/src/main/java/org/acme/PaymentService.java
+@@ -59,8 +59,8 @@ public class PaymentService {
+     public Response pay(@HeaderParam(LRA_HTTP_CONTEXT_HEADER) URI lraId, Purchase purchase) {
+         purchase.setItem("PAYMENT# ".concat(purchase.getItem()));
+         log.info(">>> Payment received for LRA {} and Purchase {}", lraId, purchase);
+-//        if (new SecureRandom().nextBoolean())
+-//            return Response.serverError().build();
++        if (new SecureRandom().nextBoolean())
++            return Response.serverError().build();
+         payments.send(KafkaRecord.of(lraId, purchase));
+         JsonObject response = new JsonObject().put("message", "Payment Made LRA #" + lraId);
+         response.put("purchase", JsonObject.mapFrom(purchase));
+```
+
+Rebuild payment-service and restart it
+```bash
+cd payment-service && mvn clean package
+java -Dquarkus.profile=dev -jar ./payment-service/target/quarkus-app/quarkus-run.jar
+```
+
+Now when a failure happens, you should see compensating actions (CANCEL of bookings and payments) in the Kafka (bookings, payments) topics.
