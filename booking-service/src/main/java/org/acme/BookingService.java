@@ -98,10 +98,10 @@ public class BookingService {
                 price.doubleValue());
         JsonObject response = new JsonObject().put("message", "Trip Booked LRA #" + lraId);
         try {
-        Uni<Response> flightResponse = Uni.createFrom().item(flightService.buy(purchase))
-                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
-        Uni<Response> hotelResponse = Uni.createFrom().item(hotelService.buy(purchase))
-                .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
+            Uni<Response> flightResponse = Uni.createFrom().item(flightService.buy(purchase))
+                    .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
+            Uni<Response> hotelResponse = Uni.createFrom().item(hotelService.buy(purchase))
+                    .runSubscriptionOn(Infrastructure.getDefaultWorkerPool());
             response.put("flight", flightResponse.await().indefinitely().readEntity(JsonObject.class));
             response.put("hotel", hotelResponse.await().indefinitely().readEntity(JsonObject.class));
         } catch (Exception ex) {
