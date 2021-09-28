@@ -9,6 +9,7 @@ When booking a trip (a flight and a hotel), the payment service has an induced e
 - http://quarkus.io/guides/lra
 - https://github.com/quarkusio/quarkusio.github.io/blob/d2cb1bc3c2b8f78c3b1a02fda1f6a44e6a836fca/_posts/2021-08-23-using-lra.adoc
 
+In the successful case you will see a BOOKING and a PAYMENT for both the HOTEL and FLIGHT service. 
 
 ## Running locally
 
@@ -86,7 +87,7 @@ Check LRA - should be empty if no failures
 curl -s http://localhost:50000/lra-coordinator | jq .
 ```
 
-## Introduce random failure
+## Testing Failures
 
 Introduce some random failure into the payment service:
 ```java
