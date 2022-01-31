@@ -20,7 +20,7 @@ podman-compose up -d
 
 (Optional) Create kafka topics
 ```bash
-add_path /opt/kafka_2.13-2.8.0/bin
+add_path /opt/kafka_2.13-3.1.0/bin
 kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic bookings
 kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic payments
 ```
